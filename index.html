@@ -19,6 +19,21 @@
             padding: 10px;
             font-family: 'Courier New', Courier, monospace; /* Essential for text editors */
         }
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            background-color: #007bff; /* A nice "IDE blue" */
+            margin-left: -1px;
+            margin-right: -1px;
+            animation: blink 1.2s step-end infinite;
+            vertical-align: middle;
+            height: 1.2em; /* Ensures it matches your font height */
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
     </style>
 </head>
 <body>

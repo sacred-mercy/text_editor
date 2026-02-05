@@ -2,7 +2,7 @@ import {Document} from "./Document.js";
 
 class Editor {
     constructor(elementId) {
-        this.display = document.getElementById('editor-container');
+        this.display = document.getElementById(elementId);
         this.buffer = new Document();
         this.cursorIndex = 0;
         this.init();
@@ -24,20 +24,29 @@ class Editor {
         } else if (e.key === 'ArrowRight') {
             this.incrementCursorIndex()
         }
-
+        console.log(this.cursorIndex)
         this.render();
     }
 
     render() {
-        this.display.innerText = this.buffer.getContentString();
+        const text = this.buffer.getContentString();
+        const index = this.cursorIndex;
+
+        const before = text.slice(0, index);
+        const after = text.slice(index);
+        const cursor = `<span class = "cursor">&#8203;</span>`;
+        this.display.innerHTML = before+cursor+after;
     }
 
     incrementCursorIndex() {
+        if (this.cursorIndex === this.buffer.content.length) {
+            return;
+        }
         this.cursorIndex++;
     }
 
     decrementCursorIndex() {
-        if (this.cursorIndex.length <= 0)
+        if (this.cursorIndex === 0)
             return;
         this.cursorIndex--;
     }
@@ -53,4 +62,4 @@ class Editor {
     }
 }
 
-const myEditor = new Editor('editor-container');
+new Editor('editor-container');
