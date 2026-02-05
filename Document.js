@@ -13,9 +13,7 @@ export class Document {
 
     // Now accepts index as a parameter
     remove(index) {
-        if (index > 0) {
-            this._content.splice(index - 1, 1);
-        }
+        this._content.splice(index - 1, 1);
     }
 
     getContentString() {

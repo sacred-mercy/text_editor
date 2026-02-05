@@ -13,6 +13,13 @@ class Editor {
     }
 
     handleKeyPress(e) {
+        // List of keys we want to handle ourselves
+        const handledKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Backspace', 'Enter'];
+
+        if (e.key.length === 1 || handledKeys.includes(e.key)) {
+            e.preventDefault(); // Stop the browser from scrolling or doing weird things
+        }
+
         if (e.key.length === 1) {
             this.insert(e.key);
         } else if (e.key === 'Backspace') {
@@ -57,6 +64,9 @@ class Editor {
     }
 
     remove() {
+        if (this.cursorIndex <=0) {
+            return;
+        }
         this.buffer.remove(this.cursorIndex);
         this.decrementCursorIndex();
     }
