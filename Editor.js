@@ -18,7 +18,7 @@ class Editor {
         } else if (e.key === 'Backspace') {
             this.remove();
         } else if (e.key === 'Enter') {
-            this.buffer.insert('\n');
+            this.insert('\n');
         } else if (e.key === 'ArrowLeft') {
             this.decrementCursorIndex()
         } else if (e.key === 'ArrowRight') {
