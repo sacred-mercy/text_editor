@@ -31,7 +31,8 @@ class Editor {
         } else if (e.key === 'ArrowRight') {
             this.incrementCursorIndex()
         }
-        console.log(this.cursorIndex)
+
+        this.cursorIndex = this.buffer.getCursorLength();
         this.render();
     }
 
@@ -46,29 +47,19 @@ class Editor {
     }
 
     incrementCursorIndex() {
-        if (this.cursorIndex === this.buffer.content.length) {
-            return;
-        }
-        this.cursorIndex++;
+        this.buffer.incrementCursorIndex();
     }
 
     decrementCursorIndex() {
-        if (this.cursorIndex === 0)
-            return;
-        this.cursorIndex--;
+        this.buffer.decrementCursorIndex();
     }
 
     insert(key) {
-        this.buffer.insert(key, this.cursorIndex);
-        this.incrementCursorIndex();
+        this.buffer.insert(key);
     }
 
     remove() {
-        if (this.cursorIndex <=0) {
-            return;
-        }
-        this.buffer.remove(this.cursorIndex);
-        this.decrementCursorIndex();
+        this.buffer.remove();
     }
 }
 

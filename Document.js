@@ -1,26 +1,47 @@
 export class Document {
-    get content() {
-        return this._content;
-    }
-    constructor() {
-        this._content = [];
-    }
-
-    // Now accepts index as a parameter
-    insert(char, index) {
-        this._content.splice(index, 0, char);
+    _before = [];
+    _after = [];
+    get after() {
+        return this._after;
     }
 
-    // Now accepts index as a parameter
-    remove(index) {
-        this._content.splice(index - 1, 1);
+    get before() {
+        return this._before;
+    }
+
+    insert(char) {
+        this.before.push(char);
+    }
+
+    remove() {
+        this.before.pop();
     }
 
     getContentString() {
-        return this._content.join('');
+        //reverse edits the original array can use toReversed but it is new using spread for backward compatibility
+        const reversedAfter = [...this.after].reverse();
+        return this.before.join('') + reversedAfter.join('');
     }
 
-    get length() {
-        return this._content.length;
+    getLength() {
+        return this._before.length + this._after.length;
+    }
+
+    getCursorLength() {
+        return this._before.length;
+    }
+
+    incrementCursorIndex() {
+        if (this._after.length === 0)
+            return;
+
+        this._before.push(this._after.pop());
+    }
+
+    decrementCursorIndex() {
+        if (this._before.length === 0)
+            return;
+
+        this._after.push(this._before.pop());
     }
 }
