@@ -4,41 +4,37 @@ class Editor {
     constructor(elementId) {
         this.display = document.getElementById(elementId);
         this.buffer = new Document();
-        this.cursorIndex = 0;
         this.init();
     }
 
     init() {
         window.addEventListener('keydown', (e) => this.handleKeyPress(e));
+        this.render();
     }
 
     handleKeyPress(e) {
-        // List of keys we want to handle ourselves
-        const handledKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Backspace', 'Enter'];
-
-        if (e.key.length === 1 || handledKeys.includes(e.key)) {
-            e.preventDefault(); // Stop the browser from scrolling or doing weird things
-        }
+        this.preventDefaultOfInternalKeysInBrowser(e);
 
         if (e.key.length === 1) {
-            this.insert(e.key);
+            this.buffer.insert(e.key);
         } else if (e.key === 'Backspace') {
-            this.remove();
+            this.buffer.remove();
         } else if (e.key === 'Enter') {
-            this.insert('\n');
+            this.buffer.insertNewLine();
         } else if (e.key === 'ArrowLeft') {
-            this.decrementCursorIndex()
+            this.buffer.decrementCursorIndex()
         } else if (e.key === 'ArrowRight') {
-            this.incrementCursorIndex()
+            this.buffer.incrementCursorIndex()
+        } else if (e.key === 'ArrowUp') {
+            this.buffer.moveCursorUp();
         }
 
-        this.cursorIndex = this.buffer.getCursorLength();
         this.render();
     }
 
     render() {
         const text = this.buffer.getContentString();
-        const index = this.cursorIndex;
+        const index = this.buffer.getCursorIndex();
 
         const before = text.slice(0, index);
         const after = text.slice(index);
@@ -46,20 +42,13 @@ class Editor {
         this.display.innerHTML = before+cursor+after;
     }
 
-    incrementCursorIndex() {
-        this.buffer.incrementCursorIndex();
-    }
 
-    decrementCursorIndex() {
-        this.buffer.decrementCursorIndex();
-    }
+    preventDefaultOfInternalKeysInBrowser(e) {
+        const handledKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Backspace', 'Enter'];
 
-    insert(key) {
-        this.buffer.insert(key);
-    }
-
-    remove() {
-        this.buffer.remove();
+        if (e.key.length === 1 || handledKeys.includes(e.key)) {
+            e.preventDefault();
+        }
     }
 }
 
