@@ -104,6 +104,18 @@ export class Document {
         return 0;
     }
 
+    findEndOfLineIndex(offset = 0) {
+        // after is reversed
+        const afterLengthLastIndex = this._after.length - 1;
+        for (let i = afterLengthLastIndex - offset; i >= 0; i--) {
+            if (this._after.at(i) === this.newLineChar) {
+                return this.getCursorIndex() + (afterLengthLastIndex - i);
+            }
+        }
+
+        return this.getLength(); // no new line till end of doc
+    }
+
     moveCursorUp() {
         const currentLine = this.getLineCount();
         if (currentLine === 0) {
@@ -116,6 +128,22 @@ export class Document {
         const charInPrevLine = (currentLineStartIndex - 1) - prevLineStartIndex;
         const additionalColumns = Math.min(charInPrevLine, currentColumn);
         const targetIndex = prevLineStartIndex + additionalColumns;
+        this.moveCursorTo(targetIndex);
+    }
+
+    moveCursorDown() {
+        const currentLineEndIndex = this.findEndOfLineIndex();
+        const currentCursorIndex = this.getCursorIndex();
+        const totalLength = this.getLength();
+        if (currentLineEndIndex === totalLength) {
+            this.moveCursorTo(totalLength)
+            return;
+        }
+        const nextLineEndIndex = this.findEndOfLineIndex((currentLineEndIndex - currentCursorIndex)+1);
+        const currentColumn = this.getCurrentLineCursorCount();
+        const charInNextLine = nextLineEndIndex - (currentLineEndIndex + 1);
+        const additionalColumns = Math.min(charInNextLine, currentColumn);
+        const targetIndex = (currentLineEndIndex + 1) + additionalColumns;
         this.moveCursorTo(targetIndex);
     }
 }

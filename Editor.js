@@ -27,6 +27,8 @@ class Editor {
             this.buffer.incrementCursorIndex()
         } else if (e.key === 'ArrowUp') {
             this.buffer.moveCursorUp();
+        } else if (e.key === 'ArrowDown') {
+            this.buffer.moveCursorDown();
         }
 
         this.render();
