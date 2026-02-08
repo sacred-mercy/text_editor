@@ -1,6 +1,7 @@
 export class Document {
     _before = [];
     _after = [];
+    goalColumn = null;
     newLineChar = '\n';
     get after() {
         return this._after;
@@ -25,29 +26,33 @@ export class Document {
     }
 
     getLength() {
-        return this._before.length + this._after.length;
+        return this.before.length + this.after.length;
     }
 
     getCursorIndex() {
-        return this._before.length;
+        return this.before.length;
     }
 
     incrementCursorIndex() {
-        if (this._after.length === 0)
-            return;
+        this.resetGoalColumn()
+        this.popAndPush(this.before, this.after);
+    }
 
-        this._before.push(this._after.pop());
+
+
+    popAndPush(pushArr, popArr) {
+        if (popArr.length === 0)
+            return;
+        pushArr.push(popArr.pop());
     }
 
     decrementCursorIndex() {
-        if (this._before.length === 0)
-            return;
-
-        this._after.push(this._before.pop());
+        this.resetGoalColumn();
+        this.popAndPush(this.after, this.before);
     }
 
     getLineCount() {
-        return this._before.reduce(
+        return this.before.reduce(
             (a, b) => ((b === this.newLineChar) ? ++a : a),
             0
         );
@@ -55,14 +60,14 @@ export class Document {
 
     getCurrentLineCursorCount() {
         let currentColumn = 0;
-        const beforeCursorLength = this._before.length;
+        const beforeCursorLength = this.before.length;
         if (this.getLineCount() === 0) {
             currentColumn = beforeCursorLength;
         } else {
             const startIndex = beforeCursorLength - 1;
             for (let i = startIndex; i >= 0; i--) {
-                // console.log(this._before.at(i))
-                if (this._before.at(i) === this.newLineChar) {
+                // console.log(this.before.at(i))
+                if (this.before.at(i) === this.newLineChar) {
                     currentColumn = startIndex - i;
                     break;
                 }
@@ -76,6 +81,17 @@ export class Document {
         this.insert(this.newLineChar);
     }
 
+    resetGoalColumn() {
+        this.goalColumn = null;
+        console.log('resetting goalColumn');
+    }
+
+    setGoalColumn(columnIndex) {
+        if (this.goalColumn !== null)
+            return;
+        this.goalColumn = columnIndex;
+    }
+
     moveCursorTo(targetIndex) {
         const currentIndex = this.getCursorIndex();
 
@@ -84,18 +100,18 @@ export class Document {
         }
         if (currentIndex > targetIndex) {
             while (this.getCursorIndex() > targetIndex) {
-                this.decrementCursorIndex();
+                this.popAndPush(this.after, this.before);
             }
         } else {
             while (this.getCursorIndex() < targetIndex) {
-                this.incrementCursorIndex();
+                this.popAndPush(this.before, this.after);
             }
         }
     }
 
     findStartOfLineIndex(fromIndex) {
         for (let i = fromIndex; i >= 0; i--) {
-            const char = this._before.at(i);
+            const char = this.before.at(i);
             if (char === this.newLineChar) {
                 return i +1;
             }
@@ -106,9 +122,9 @@ export class Document {
 
     findEndOfLineIndex(offset = 0) {
         // after is reversed
-        const afterLengthLastIndex = this._after.length - 1;
+        const afterLengthLastIndex = this.after.length - 1;
         for (let i = afterLengthLastIndex - offset; i >= 0; i--) {
-            if (this._after.at(i) === this.newLineChar) {
+            if (this.after.at(i) === this.newLineChar) {
                 return this.getCursorIndex() + (afterLengthLastIndex - i);
             }
         }
@@ -123,10 +139,11 @@ export class Document {
             return;
         }
         const currentColumn = this.getCurrentLineCursorCount();
+        this.setGoalColumn(currentColumn)
         const currentLineStartIndex = this.findStartOfLineIndex(this.getCursorIndex());
         const prevLineStartIndex = this.findStartOfLineIndex(currentLineStartIndex - 2);
         const charInPrevLine = (currentLineStartIndex - 1) - prevLineStartIndex;
-        const additionalColumns = Math.min(charInPrevLine, currentColumn);
+        const additionalColumns = Math.min(charInPrevLine, this.goalColumn);
         const targetIndex = prevLineStartIndex + additionalColumns;
         this.moveCursorTo(targetIndex);
     }
@@ -141,8 +158,9 @@ export class Document {
         }
         const nextLineEndIndex = this.findEndOfLineIndex((currentLineEndIndex - currentCursorIndex)+1);
         const currentColumn = this.getCurrentLineCursorCount();
+        this.setGoalColumn(currentColumn);
         const charInNextLine = nextLineEndIndex - (currentLineEndIndex + 1);
-        const additionalColumns = Math.min(charInNextLine, currentColumn);
+        const additionalColumns = Math.min(charInNextLine, this.goalColumn);
         const targetIndex = (currentLineEndIndex + 1) + additionalColumns;
         this.moveCursorTo(targetIndex);
     }
