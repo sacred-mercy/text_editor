@@ -15,20 +15,11 @@ class Editor {
     handleKeyPress(e) {
         this.preventDefaultOfInternalKeysInBrowser(e);
 
+
         if (e.key.length === 1) {
             this.buffer.insert(e.key);
-        } else if (e.key === 'Backspace') {
-            this.buffer.remove();
-        } else if (e.key === 'Enter') {
-            this.buffer.insertNewLine();
-        } else if (e.key === 'ArrowLeft') {
-            this.buffer.decrementCursorIndex()
-        } else if (e.key === 'ArrowRight') {
-            this.buffer.incrementCursorIndex()
-        } else if (e.key === 'ArrowUp') {
-            this.buffer.moveCursorUp();
-        } else if (e.key === 'ArrowDown') {
-            this.buffer.moveCursorDown();
+        } else {
+            this.processOtherKeys(e);
         }
 
         this.render();
@@ -50,6 +41,29 @@ class Editor {
 
         if (e.key.length === 1 || handledKeys.includes(e.key)) {
             e.preventDefault();
+        }
+    }
+
+    processOtherKeys(e) {
+        switch(e.key) {
+            case 'Backspace':
+                this.buffer.remove();
+                break;
+            case 'Enter':
+                this.buffer.insertNewLine();
+                break;
+            case 'ArrowLeft':
+                this.buffer.decrementCursorIndex();
+                break;
+            case 'ArrowRight':
+                this.buffer.incrementCursorIndex()
+                break;
+            case 'ArrowUp':
+                this.buffer.moveCursorUp();
+                break;
+            case 'ArrowDown':
+                this.buffer.moveCursorDown();
+                break;
         }
     }
 }
