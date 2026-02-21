@@ -1,9 +1,12 @@
 import {Document} from "./Document.js";
+import {InsertCommand, RemoveCommand} from "./Commands.js";
 
 class Editor {
     constructor(elementId) {
         this.display = document.getElementById(elementId);
         this.buffer = new Document();
+        this.undoStack = [];
+        this.redoStack = [];
         this.init();
     }
 
@@ -15,14 +18,32 @@ class Editor {
     handleKeyPress(e) {
         this.preventDefaultOfInternalKeysInBrowser(e);
 
+        const isCtrlKeyPressed = e.ctrlKey || e.metaKey; // meta for mac cmd key
 
         if (e.key.length === 1) {
-            this.buffer.insert(e.key);
+            if (isCtrlKeyPressed) {
+                this.processCtrlShortcuts(e);
+            } else {
+                this.executeInsert(e.key);
+            }
         } else {
             this.processOtherKeys(e);
         }
 
         this.render();
+    }
+
+    executeInsert(key) {
+        this.executeCommand(new InsertCommand(key, this.buffer))
+    }
+
+    processCtrlShortcuts(e) {
+        const key = e.key;
+        if (key === 'z') {
+            this.undo();
+        } else if (key === 'y') {
+            this.redo();
+        }
     }
 
     render() {
@@ -47,10 +68,11 @@ class Editor {
     processOtherKeys(e) {
         switch(e.key) {
             case 'Backspace':
-                this.buffer.remove();
+                this.executeCommand(new RemoveCommand(this.buffer));
+                // this.buffer.remove();
                 break;
             case 'Enter':
-                this.buffer.insertNewLine();
+                this.executeInsert(this.buffer.getNewLine())
                 break;
             case 'ArrowLeft':
                 this.buffer.decrementCursorIndex();
@@ -65,6 +87,32 @@ class Editor {
                 this.buffer.moveCursorDown();
                 break;
         }
+    }
+
+    executeCommand(command) {
+        command.execute();
+        this.undoStack.push(command);
+        this.redoStack = [];
+    }
+
+    undo() {
+        const command = this.undoStack.pop();
+        if (! command) {
+            return;
+        }
+
+        command.undo();
+        this.redoStack.push(command);
+    }
+
+    redo() {
+        const command = this.redoStack.pop();
+        if (! command) {
+            return;
+        }
+
+        command.execute();
+        this.undoStack.push(command);
     }
 }
 

@@ -77,8 +77,8 @@ export class Document {
         return currentColumn;
     }
 
-    insertNewLine() {
-        this.insert(this.newLineChar);
+    getNewLine() {
+        return this.newLineChar;
     }
 
     resetGoalColumn() {
